@@ -1,8 +1,8 @@
 import { Layout, Card, Statistic, List, Typography, Spin, Tag } from "antd";
 import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
-import { fakeFetchCrypto, fetchAssets } from "../../api";
-import { capitalize, percentDefference } from "../../utils.js";
+import { capitalize } from "../../utils.js";
+import { useContext } from "react";
+import CryptoContext from "../../context/crypto-context.jsx";
 
 const siderStyle = {
   padding: "10px",
@@ -12,37 +12,9 @@ const siderStyle = {
 };
 
 export default function AppSider() {
-  const [loading, setLoading] = useState(false);
-  const [crypto, setCrypto] = useState([]);
-  const [assets, setAssets] = useState([]);
+  const { assets } = useContext(CryptoContext);
 
-  useEffect(() => {
-    async function preload() {
-      setLoading(true);
-      const { result } = await fakeFetchCrypto();
-      const assets = await fetchAssets();
 
-      setAssets(
-        assets.map((asset) => {
-          const coin = result.find((c) => c.id === asset.id);
-          return {
-            grow: asset.price < coin.price,
-            growPercent: percentDefference(asset.price, coin.price),
-            totalAmount: asset.amount * coin.price,
-            totalProfit: asset.amount * coin.price - asset.amount * asset.price,
-            ...asset,
-          };
-        })
-      );
-      setCrypto(result);
-      setLoading(false);
-    }
-    preload();
-  }, []);
-
-  if (loading) {
-    return <Spin fullscreen />;
-  }
 
   return (
     <>
@@ -60,21 +32,29 @@ export default function AppSider() {
             <List
               size="small"
               dataSource={[
-                { title: "Total Profit", value: asset.totalProfit, withTag: true },
+                {
+                  title: "Total Profit",
+                  value: asset.totalProfit,
+                  withTag: true,
+                },
                 { title: "Asset Amount", value: asset.amount, isPlain: true },
                 // { title: "Difference", value: asset.growPercent },
               ]}
               renderItem={(item) => (
-                <List.Item >
+                <List.Item>
                   <span>{item.title}</span>
                   <span>
-                    {item.withTag && <Tag color={asset.grow ? 'green' : 'red'}>{asset.growPercent} %</Tag>}
-                  {item.isPlain && item.value}
-                  {!item.isPlain && (
-                    <Typography.Text type={asset.grow ? "success" : "danger"}>
-                      {item.value.toFixed(2)} $
-                    </Typography.Text>
-                  )}
+                    {item.withTag && (
+                      <Tag color={asset.grow ? "green" : "red"}>
+                        {asset.growPercent} %
+                      </Tag>
+                    )}
+                    {item.isPlain && item.value}
+                    {!item.isPlain && (
+                      <Typography.Text type={asset.grow ? "success" : "danger"}>
+                        {item.value.toFixed(2)} $
+                      </Typography.Text>
+                    )}
                   </span>
                 </List.Item>
               )}
