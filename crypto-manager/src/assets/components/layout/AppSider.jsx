@@ -8,13 +8,11 @@ const siderStyle = {
   padding: "10px",
   lineHeight: "120px",
   color: "#fff",
-  backgroundColor: "#1677ff",
+  backgroundColor: "#",
 };
 
 export default function AppSider() {
   const { assets } = useContext(CryptoContext);
-
-
 
   return (
     <>
